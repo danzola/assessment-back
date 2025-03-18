@@ -3,7 +3,7 @@ using CoE.Assessment.Domain.Events;
 
 namespace CoE.Assessment.Domain.Bus
 {
-    interface IEventBus
+    public interface IEventBus
     {
         Task SendCommand<T>(T command) where T : Command;
         Task Publish<T>(T @event) where T : Event;

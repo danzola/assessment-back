@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35806.99 d17.13
+VisualStudioVersion = 17.13.35806.99
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microservices", "Microservices", "{AEE4BEDF-3DE1-44A3-915C-5F5D092B75EE}"
 EndProject
@@ -9,11 +9,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoE.Assessment.Domain", "Co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoE.Assessment.Infrastucture.Bus", "CoE.Assessment.Infrastucture.Bus\CoE.Assessment.Infrastucture.Bus.csproj", "{54F67FBA-FE26-4C12-A45E-6072E60A36EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoE.Assessment.Infrastructure.Bus", "CoE.Assessment.Infrastructure.Bus\CoE.Assessment.Infrastructure.Bus.csproj", "{54F67FBA-FE26-4C12-A45E-6072E60A36EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoE.Assessment.Infrastucture.IoC", "CoE.Assessment.Infrastucture.IoC\CoE.Assessment.Infrastucture.IoC.csproj", "{FB7242B0-EBDB-43E2-A26D-D6E5B85FD70D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoE.Assessment.Infrastructure.IoC", "CoE.Assessment.Infrastructure.IoC\CoE.Assessment.Infrastructure.IoC.csproj", "{FB7242B0-EBDB-43E2-A26D-D6E5B85FD70D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{7FAE5C2B-89E8-47DE-B2F4-FF87E1640DCD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Orders", "Orders", "{65BCA754-9CD5-47A9-880B-86B068EB799E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Products", "Products", "{5DE0438D-8FB4-42D4-808D-F2FAB5FFF3E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoE.Assessment.Orders.Api", "CoE.Assessment.Orders.Api\CoE.Assessment.Orders.Api.csproj", "{3E2AB5EB-51E6-42A7-A040-CF300D1A503E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoE.Assessment.Orders.Application", "CoE.Assessment.Orders.Application\CoE.Assessment.Orders.Application.csproj", "{CFC17B4D-4855-40E7-9305-9389947D504E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoE.Assessment.Orders.Domain", "CoE.Assessment.Orders.Domain\CoE.Assessment.Orders.Domain.csproj", "{759FEABA-FD59-4323-B5ED-EB2E0E7DFEF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +43,18 @@ Global
 		{FB7242B0-EBDB-43E2-A26D-D6E5B85FD70D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB7242B0-EBDB-43E2-A26D-D6E5B85FD70D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB7242B0-EBDB-43E2-A26D-D6E5B85FD70D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E2AB5EB-51E6-42A7-A040-CF300D1A503E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E2AB5EB-51E6-42A7-A040-CF300D1A503E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E2AB5EB-51E6-42A7-A040-CF300D1A503E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E2AB5EB-51E6-42A7-A040-CF300D1A503E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFC17B4D-4855-40E7-9305-9389947D504E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFC17B4D-4855-40E7-9305-9389947D504E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFC17B4D-4855-40E7-9305-9389947D504E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFC17B4D-4855-40E7-9305-9389947D504E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{759FEABA-FD59-4323-B5ED-EB2E0E7DFEF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{759FEABA-FD59-4323-B5ED-EB2E0E7DFEF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{759FEABA-FD59-4323-B5ED-EB2E0E7DFEF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{759FEABA-FD59-4323-B5ED-EB2E0E7DFEF1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -41,6 +63,11 @@ Global
 		{CCD6FC42-ACCC-4E32-BA45-85468A593061} = {7FAE5C2B-89E8-47DE-B2F4-FF87E1640DCD}
 		{54F67FBA-FE26-4C12-A45E-6072E60A36EF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{FB7242B0-EBDB-43E2-A26D-D6E5B85FD70D} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{65BCA754-9CD5-47A9-880B-86B068EB799E} = {AEE4BEDF-3DE1-44A3-915C-5F5D092B75EE}
+		{5DE0438D-8FB4-42D4-808D-F2FAB5FFF3E8} = {AEE4BEDF-3DE1-44A3-915C-5F5D092B75EE}
+		{3E2AB5EB-51E6-42A7-A040-CF300D1A503E} = {65BCA754-9CD5-47A9-880B-86B068EB799E}
+		{CFC17B4D-4855-40E7-9305-9389947D504E} = {65BCA754-9CD5-47A9-880B-86B068EB799E}
+		{759FEABA-FD59-4323-B5ED-EB2E0E7DFEF1} = {65BCA754-9CD5-47A9-880B-86B068EB799E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {268237CC-222A-4BC6-98BC-D0037DE6A84E}
