@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using CoE.Assessment.Orders.Application.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,9 +19,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("Orders",() =>
+app.MapPost("/orders",(NewOrderDto newOrderDto) =>
 {
-    return "OK";
+    var context = new ValidationContext(newOrderDto);
+    var results = new List<ValidationResult>();
+
+    if (!Validator.TryValidateObject(newOrderDto, context, results, true))
+    {
+        return Results.BadRequest(results.Select(r => r.ErrorMessage));
+    }
+
+    return Results.Ok(new { Message = "Order processed", newOrderDto });
 });
 
 app.Run();
