@@ -12,9 +12,6 @@ namespace CoE.Assessment.Orders.Application.Models
 
         [Required]
         [Range(1, 10)]
-        public int Quantity { get; init; }
-
-        [Required]
-        public decimal TotalAmount { get; init; }
+        public int Quantity { get; init; }        
     }
 }

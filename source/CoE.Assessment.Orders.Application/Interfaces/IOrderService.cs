@@ -2,7 +2,7 @@
 
 namespace CoE.Assessment.Orders.Application.Interfaces
 {
-    interface IOrderService
+    public interface IOrderService
     {
         Task Create(NewOrderDto newOrderDto);
     }
