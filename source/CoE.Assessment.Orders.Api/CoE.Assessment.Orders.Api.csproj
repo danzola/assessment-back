@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CoE.Assessment.Infrastructure.IoC\CoE.Assessment.Infrastructure.IoC.csproj" />
     <ProjectReference Include="..\CoE.Assessment.Orders.Application\CoE.Assessment.Orders.Application.csproj" />
+    <ProjectReference Include="..\CoE.Assessment.Orders.Data\CoE.Assessment.Orders.Data.csproj" />
   </ItemGroup>
 
 </Project>
