@@ -1,12 +1,8 @@
-﻿namespace CoE.Assessment.Domain.Events
-{
-    public abstract class Event
-    {
-        public DateTime Timestamp { get; protected set; }
+﻿using CoE.Assessment.Domain.Bus;
 
-        protected Event()
-        {
-            Timestamp = DateTime.Now;
-        }
+namespace CoE.Assessment.Domain.Events
+{
+    public abstract class Event: Message
+    {        
     }
 }

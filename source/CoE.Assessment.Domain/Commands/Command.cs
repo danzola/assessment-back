@@ -1,13 +1,8 @@
-﻿using CoE.Assessment.Domain.Events;
+﻿using CoE.Assessment.Domain.Bus;
 
 namespace CoE.Assessment.Domain.Commands
 {
-    public abstract class Command : Message
-    {
-        public DateTime Timestamp { get; protected set; }
-        protected Command()
-        {
-            Timestamp = DateTime.Now;
-        }
+    public abstract class Command: Message
+    {        
     }
 }

@@ -1,17 +1,17 @@
-﻿using CoE.Assessment.Domain.Bus;
+﻿using CoE.Assessment.Domain.Commands;
 using CoE.Assessment.Orders.Application.Interfaces;
 using CoE.Assessment.Orders.Application.Models;
 using CoE.Assessment.Orders.Domain.Commands;
 
 namespace CoE.Assessment.Orders.Application.Services
 {
-    public class OrderService(IEventBus eventBus) : IOrderService
+    public class OrderService(ICommandBus commandBus) : IOrderService
     {
-        private readonly IEventBus _eventBus = eventBus;
+        private readonly ICommandBus _commandBus = commandBus;
         public async Task Create(NewOrderDto newOrderDto)
         {
             var verifyProductCommand = new VerifyProductCommand(newOrderDto.CustomerId, newOrderDto.ProductId, newOrderDto.Quantity);
-            await _eventBus.SendCommand(verifyProductCommand);
+            await _commandBus.SendCommand(verifyProductCommand);
         }
     }
 }

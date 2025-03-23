@@ -1,8 +1,8 @@
-﻿using CoE.Assessment.Domain.Events;
+﻿using CoE.Assessment.Domain.Commands;
 
-namespace CoE.Assessment.Orders.Domain.Events
+namespace CoE.Assessment.Products.Domain.Commands
 {
-    public class ProductVerifiedEvent(int customerId, int productId, int quantity) : Event
+    public class VerifyProductCommand(int customerId, int productId, int quantity) : Command
     {
         public int CustomerId { get; init; } = customerId;
         public int ProductId { get; init; } = productId;

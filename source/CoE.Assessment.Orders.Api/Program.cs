@@ -1,25 +1,18 @@
 using System.ComponentModel.DataAnnotations;
-using System.Reflection;
 using CoE.Assessment.Infrastructure.IoC;
 using CoE.Assessment.Orders.Application.Interfaces;
 using CoE.Assessment.Orders.Application.Models;
 using CoE.Assessment.Orders.Application.Services;
-using CoE.Assessment.Orders.Domain.CommandHandlers;
-using CoE.Assessment.Orders.Domain.Commands;
-using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddTransient<IOrderService, OrderService>();
-builder.Services.AddTransient<IRequestHandler<VerifyProductCommand, bool>, VerifyProductCommandHandler>();
 builder.Services.AddMicroRabbitServices();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
 var app = builder.Build();
 

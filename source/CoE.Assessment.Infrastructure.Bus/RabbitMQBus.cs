@@ -1,21 +1,21 @@
 ﻿using System.Text;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using CoE.Assessment.Domain.Bus;
 using CoE.Assessment.Domain.Commands;
 using CoE.Assessment.Domain.Events;
+using CoE.Assessment.Domain.Bus;
 
 namespace CoE.Assessment.Infrastructure.Bus
 {
-    public sealed class RabbitMQBus(IMediator mediator, IServiceScopeFactory serviceScopeFactory) : IEventBus, IAsyncDisposable
+    public sealed class RabbitMQBus(IServiceScopeFactory serviceScopeFactory) : IEventBus, ICommandBus, IAsyncDisposable
     {
-        private readonly IMediator _mediator = mediator;
         private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
-        private readonly Dictionary<string, List<Type>> _handlers = [];
+        private readonly Dictionary<string, List<Type>> _eventHandlers = [];
+        private readonly Dictionary<string, List<Type>> _commandHandlers = [];
         private readonly List<Type> _eventTypes = [];
+        private readonly List<Type> _commandTypes = [];
         private IConnection? _connection;
         private IChannel? _channel;
 
@@ -30,12 +30,7 @@ namespace CoE.Assessment.Infrastructure.Bus
             _channel = await _connection.CreateChannelAsync();
         }
 
-        public Task SendCommand<T>(T command) where T : Command
-        {
-            return _mediator.Send(command);
-        }
-
-        public async Task Publish<T>(T @event) where T : Event
+        public async Task PublishEvent<T>(T @event) where T : Event
         {
             if (_connection is null || _channel is null)
             {
@@ -52,7 +47,24 @@ namespace CoE.Assessment.Infrastructure.Bus
             await _channel.BasicPublishAsync(exchange: "", routingKey: eventName, body: body);
         }
 
-        public async Task Subscribe<T, TH>()
+        public async Task SendCommand<T>(T command) where T : Command
+        {
+            if (_connection is null || _channel is null)
+            {
+                await InitializeConnectionAsync();
+            }
+
+            var commandName = command.GetType().Name;
+
+            await _channel!.QueueDeclareAsync(commandName, false, false, false, null);
+
+            var message = JsonConvert.SerializeObject(command);
+            var body = Encoding.UTF8.GetBytes(message);
+
+            await _channel.BasicPublishAsync(exchange: "", routingKey: commandName, body: body);
+        }
+
+        public async Task SubscribeEvent<T, TH>()
             where T : Event
             where TH : IEventHandler<T>
         {
@@ -69,30 +81,63 @@ namespace CoE.Assessment.Infrastructure.Bus
                 _eventTypes.Add(typeof(T));
             }
 
-            if (!_handlers.ContainsKey(eventName))
+            if (!_eventHandlers.ContainsKey(eventName))
             {
-                _handlers.Add(eventName, new List<Type>());
+                _eventHandlers.Add(eventName, []);
             }
 
-            if (_handlers[eventName].Any(s => s.GetType() == handlerType))
+            if (_eventHandlers[eventName].Any(s => s.GetType() == handlerType))
             {
                 throw new ArgumentException(
                     $"Handler Type {handlerType.Name} already is registered for '{eventName}'", nameof(handlerType));
             }
 
-            _handlers[eventName].Add(handlerType);
+            _eventHandlers[eventName].Add(handlerType);
+
+            await StartBasicConsumeAsync<T, TH>();
+        }
+
+        public async Task SubscribeCommand<T, TH>()
+            where T : Command
+            where TH : ICommandHandler<T>
+        {
+            if (_connection is null || _channel is null)
+            {
+                await InitializeConnectionAsync();
+            }
+
+            var commandName = typeof(T).Name;
+            var handlerType = typeof(TH);
+
+            if (!_commandTypes.Contains(typeof(T)))
+            {
+                _commandTypes.Add(typeof(T));
+            }
+
+            if (!_commandHandlers.ContainsKey(commandName))
+            {
+                _commandHandlers.Add(commandName, []);
+            }
+
+            if (_commandHandlers[commandName].Any(s => s.GetType() == handlerType))
+            {
+                throw new ArgumentException(
+                    $"Handler Type {handlerType.Name} already is registered for '{commandName}'", nameof(handlerType));
+            }
+
+            _commandHandlers[commandName].Add(handlerType);
 
             await StartBasicConsumeAsync<T, TH>();
         }
 
         private async Task StartBasicConsumeAsync<T, TH>()
-            where T : Event
-            where TH : IEventHandler<T>
+            where T : Message
+            where TH : IHandler<T>
         {
-            var eventName = typeof(T).Name;
+            var queueName = typeof(T).Name;
 
             await _channel!.QueueDeclareAsync(
-                queue: eventName,
+                queue: queueName,
                 durable: false,
                 exclusive: false,
                 autoDelete: false,
@@ -102,34 +147,49 @@ namespace CoE.Assessment.Infrastructure.Bus
             consumer.ReceivedAsync += Consumer_ReceivedAsync<T, TH>;
 
             await _channel.BasicConsumeAsync(
-                queue: eventName,
+                queue: queueName,
                 autoAck: true,
                 consumer: consumer);
         }
 
         private async Task Consumer_ReceivedAsync<T, TH>(object sender, BasicDeliverEventArgs e)
-            where T : Event
-            where TH : IEventHandler<T>
+            where T : Message
+            where TH : IHandler<T>
         {
-            var eventName = e.RoutingKey;
+            var messageName = e.RoutingKey;
             var body = @e.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
             try
             {
-                await ProcessEvent<T, TH>(eventName, message).ConfigureAwait(false);
+                if (typeof(T).IsSubclassOf(typeof(Event)))
+                {
+                    await ProcessMessage<T, TH>(messageName, message,_eventHandlers,_eventTypes).ConfigureAwait(false);
+                }
+                else if (typeof(T).IsSubclassOf(typeof(Command)))
+                {
+                    await ProcessMessage<T, TH>(messageName, message, _commandHandlers, _commandTypes).ConfigureAwait(false);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Unsupported message type: {typeof(T).Name}");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error consuming message: {ex.Message}");
                 throw;
             }
-        }
+        }        
 
-        private async Task ProcessEvent<T, TH>(string eventName, string message)
-            where T : Event
-            where TH : IEventHandler<T>
+        private async Task ProcessMessage<T, TH>(
+            string messageName, 
+            string message,
+            Dictionary<string, List<Type>> handlerDictionary,
+            List<Type> messageTypes)
+            where T : Message
+            where TH : IHandler<T>
         {
-            if (_handlers.TryGetValue(eventName, out List<Type>? subscriptions))
+            if (handlerDictionary.TryGetValue(messageName, out List<Type>? subscriptions))
             {
                 using var scope = _serviceScopeFactory.CreateScope();
                 foreach (var subscription in subscriptions)
@@ -137,16 +197,17 @@ namespace CoE.Assessment.Infrastructure.Bus
                     var handler = scope.ServiceProvider.GetRequiredService<TH>();
                     if (handler == null) continue;
 
-                    var eventType = _eventTypes.SingleOrDefault(t => t.Name == eventName);
-                    if (eventType == null) continue;
+                    var messageType = messageTypes.SingleOrDefault(t => t.Name == messageName);
+                    if (messageType == null) continue;
 
-                    var @event = JsonConvert.DeserializeObject(message, eventType);
-                    if (@event == null) continue;
+                    var messageHandled = JsonConvert.DeserializeObject(message, messageType);
+                    if (messageHandled == null) continue;
 
-                    await handler.Handle((T)@event);
+                    await handler.Handle((T)messageHandled);
                 }
             }
         }
+
         public async ValueTask DisposeAsync()
         {
             if (_channel?.IsOpen == true)
@@ -157,6 +218,5 @@ namespace CoE.Assessment.Infrastructure.Bus
 
             GC.SuppressFinalize(this);
         }
-
     }
 }
