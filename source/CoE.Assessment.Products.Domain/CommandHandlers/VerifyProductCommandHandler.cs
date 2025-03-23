@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CoE.Assessment.Domain.Commands;
+using CoE.Assessment.Products.Domain.Commands;
 
 namespace CoE.Assessment.Products.Domain.CommandHandlers
 {
-    class VerifyProductCommandHandler
+    public class VerifyProductCommandHandler : ICommandHandler<VerifyProductCommand>
     {
+        public async Task Handle(VerifyProductCommand message)
+        {
+            Console.WriteLine($"{message.ProductId}-{message.Quantity}-{message.MessageType}");
+            await Task.CompletedTask;
+        }
     }
 }

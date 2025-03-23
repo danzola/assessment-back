@@ -1,6 +1,17 @@
+using CoE.Assessment.Domain.Commands;
+using CoE.Assessment.Infrastructure.IoC;
+using CoE.Assessment.Products.Domain.CommandHandlers;
+using CoE.Assessment.Products.Domain.Commands;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddMicroRabbitServices();
+//Subscriptions
+builder.Services.AddTransient<VerifyProductCommandHandler>();
+//Bus handlers
+builder.Services.AddTransient<ICommandHandler<VerifyProductCommand>, VerifyProductCommandHandler>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -35,6 +46,9 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast")
 .WithOpenApi();
+
+var commandBus = app.Services.GetRequiredService<ICommandBus>();
+await commandBus.SubscribeCommand<VerifyProductCommand, VerifyProductCommandHandler>();
 
 app.Run();
 

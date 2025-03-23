@@ -11,4 +11,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CoE.Assessment.Infrastructure.IoC\CoE.Assessment.Infrastructure.IoC.csproj" />
+    <ProjectReference Include="..\CoE.Assessment.Products.Application\CoE.Assessment.Products.Application.csproj" />
+  </ItemGroup>  
+
 </Project>
