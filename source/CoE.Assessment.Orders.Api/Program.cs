@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using CoE.Assessment.Domain.Commands;
 using CoE.Assessment.Infrastructure.IoC;
 using CoE.Assessment.Orders.Application.Interfaces;
+using CoE.Assessment.Orders.Application.Mapper;
 using CoE.Assessment.Orders.Application.Models;
 using CoE.Assessment.Orders.Application.Services;
 using CoE.Assessment.Orders.Data.Contexts;
@@ -21,15 +22,15 @@ builder.Services.AddTransient<CreateOrderCommandHandler>();
 //Bus handlers
 builder.Services.AddTransient<ICommandHandler<CreateOrderCommand>, CreateOrderCommandHandler>();
 //Application Services
-builder.Services.AddTransient<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 //Data
-builder.Services.AddTransient<IOrdersRepository, OrdersRepository>();
+builder.Services.AddScoped<IOrdersRepository, OrdersRepository>();
 builder.Services.AddDbContext<OrdersDbContext>(options =>
 {
     options.UseSqlServer(configuration.GetConnectionString("OrdersDbConnection"));
 });
 
-
+builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -44,7 +45,19 @@ if (app.Environment.IsDevelopment())
 }
 app.UseHttpsRedirection();
 
-app.MapPost("/orders",async (NewOrderDto newOrderDto, IOrderService orderService) =>
+// GET /api/orders/{id}
+app.MapGet("/orders/{id}", async (int id, IOrderService orderService) =>
+{
+    var order = await orderService.GetByIdAsync(id);
+    if (order == null)
+    {
+        return Results.NotFound(new { Message = $"Order with ID {id} not found." });
+    }
+    return Results.Ok(order);
+});
+
+// POST /orders
+app.MapPost("/orders",async (NewOrder newOrderDto, IOrderService orderService) =>
 {
     var context = new ValidationContext(newOrderDto);
     var results = new List<ValidationResult>();
@@ -56,6 +69,28 @@ app.MapPost("/orders",async (NewOrderDto newOrderDto, IOrderService orderService
 
     await orderService.Create(newOrderDto);
     return Results.Ok(new { Message = "Order processed", newOrderDto });
+});
+
+// DELETE /api/orders/{id}
+app.MapDelete("/orders/{id}", async (int id, IOrderService orderService) =>
+{
+    await orderService.DeleteByIdAsync(id);    
+    return Results.Ok();
+});
+
+// PUT /api/orders/{id}
+app.MapPut("/orders/{id}", async (int id, UpdateOrder updateOrderDto, IOrderService orderService) =>
+{
+    var context = new ValidationContext(updateOrderDto);
+    var results = new List<ValidationResult>();
+
+    if (!Validator.TryValidateObject(updateOrderDto, context, results, true))
+    {
+        return Results.BadRequest(results.Select(r => r.ErrorMessage));
+    }
+
+    var order = await orderService.Update(id, updateOrderDto);
+    return Results.Ok(order);
 });
 
 var commandBus = app.Services.GetRequiredService<ICommandBus>();

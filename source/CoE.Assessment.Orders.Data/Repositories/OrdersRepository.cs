@@ -10,12 +10,8 @@ namespace CoE.Assessment.Orders.Data.Repositories
         private readonly OrdersDbContext _context = context;        
         public async Task<Order?> GetByIdAsync(int orderId)
         {
-            return await _context.Orders.FindAsync(orderId);
-        }
-        public async Task<IEnumerable<Order>> GetAsync()
-        {
-            return await _context.Orders.ToListAsync();
-        }
+            return await _context.Orders.FindAsync(orderId);            
+        }        
         public async Task<Order> CreateAsync(Order order)
         {
             _context.Orders.Add(order);
