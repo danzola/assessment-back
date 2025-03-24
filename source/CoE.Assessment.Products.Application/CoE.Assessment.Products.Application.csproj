@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="14.0.0" />
+	</ItemGroup>
+	
   <ItemGroup>
     <ProjectReference Include="..\CoE.Assessment.Products.Domain\CoE.Assessment.Products.Domain.csproj" />
   </ItemGroup>

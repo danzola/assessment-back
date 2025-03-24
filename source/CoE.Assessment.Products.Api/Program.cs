@@ -1,9 +1,17 @@
 using CoE.Assessment.Domain.Commands;
 using CoE.Assessment.Infrastructure.IoC;
+using CoE.Assessment.Products.Application.Interfaces;
+using CoE.Assessment.Products.Application.Mapper;
+using CoE.Assessment.Products.Application.Services;
+using CoE.Assessment.Products.Data.Contexts;
+using CoE.Assessment.Products.Data.Repositories;
 using CoE.Assessment.Products.Domain.CommandHandlers;
 using CoE.Assessment.Products.Domain.Commands;
+using CoE.Assessment.Products.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
 
 // Add services to the container.
 builder.Services.AddMicroRabbitServices();
@@ -11,6 +19,16 @@ builder.Services.AddMicroRabbitServices();
 builder.Services.AddTransient<VerifyProductCommandHandler>();
 //Bus handlers
 builder.Services.AddTransient<ICommandHandler<VerifyProductCommand>, VerifyProductCommandHandler>();
+//Application Services
+builder.Services.AddScoped<IProductService, ProductService>();
+//Data
+builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
+builder.Services.AddDbContext<ProductsDbContext>(options =>
+{
+    options.UseSqlServer(configuration.GetConnectionString("ProductsDbConnection"));
+});
+
+builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -27,32 +45,25 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+// GET /api/products
+app.MapGet("/products", async (IProductService productService) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    var products = await productService.GetAll();    
+    return Results.Ok(products);
+});
 
-app.MapGet("/weatherforecast", () =>
+// GET /api/products/{id}
+app.MapGet("/products/{id}", async (int id, IProductService productService) =>
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+    var product = await productService.GetByIdAsync(id);
+    if (product == null)
+    {
+        return Results.NotFound(new { Message = $"Product with ID {id} not found." });
+    }
+    return Results.Ok(product);
+});
 
 var commandBus = app.Services.GetRequiredService<ICommandBus>();
 await commandBus.SubscribeCommand<VerifyProductCommand, VerifyProductCommandHandler>();
 
 app.Run();
-
-internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
