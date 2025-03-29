@@ -25,6 +25,16 @@ builder.Services.AddAutoMapper(typeof(MapperProfile).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,6 +45,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
+
+// GET /api/customers
+app.MapGet("/customers", async (ICustomerService customerService) =>
+{
+    var customers = await customerService.GetAll();
+    return Results.Ok(customers);
+});
 
 // GET /api/customers/{id}
 app.MapGet("/customers/{id}", async (int id, ICustomerService customerService) =>

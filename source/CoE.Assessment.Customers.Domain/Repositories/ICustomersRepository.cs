@@ -5,5 +5,6 @@ namespace CoE.Assessment.Customers.Domain.Repositories
     public interface ICustomersRepository
     {
         Task<Customer?> GetByIdAsync(int id);
+        Task<IEnumerable<Customer>?> GetAll();
     }
 }

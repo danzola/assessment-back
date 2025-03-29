@@ -5,5 +5,6 @@ namespace CoE.Assessment.Customers.Application.Interfaces
     public interface ICustomerService
     {
         Task<GetCustomer> GetByIdAsync(int id);
+        Task<IEnumerable<GetCustomer>> GetAll();
     }
 }

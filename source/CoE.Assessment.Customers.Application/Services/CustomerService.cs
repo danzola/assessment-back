@@ -10,6 +10,12 @@ namespace CoE.Assessment.Customers.Application.Services
         private readonly ICustomersRepository _customersRepository = customersRepository;
         private readonly IMapper _mapper = mapper;
 
+        public async Task<IEnumerable<GetCustomer>> GetAll()
+        {
+            var customers = await _customersRepository.GetAll();
+            return _mapper.Map<IEnumerable<GetCustomer>>(customers);
+        }
+
         public async Task<GetCustomer> GetByIdAsync(int id)
         {
             var customer = await _customersRepository.GetByIdAsync(id);
