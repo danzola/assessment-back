@@ -5,13 +5,13 @@ namespace CoE.Assessment.Orders.Application.Models
     public record NewOrder
     {
         [Required]
-        public int CustomerId { get; init; }
+        public int? CustomerId { get; init; }
 
         [Required]
-        public int ProductId { get; init; }
+        public int? ProductId { get; init; }
 
         [Required]
         [Range(1, 10)]
-        public int Quantity { get; init; }
+        public int? Quantity { get; init; }
     }
 }
