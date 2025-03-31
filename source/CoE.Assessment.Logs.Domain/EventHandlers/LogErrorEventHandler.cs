@@ -8,10 +8,10 @@ namespace CoE.Assessment.Logs.Domain.EventHandlers
     {
         private readonly ILogger<LogErrorEventHandler> _logger = logger;
 
-        public async Task Handle(LogErrorEvent message)
+        public Task Handle(LogErrorEvent message)
         {
             _logger.LogError("{Message}", message.Message);
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 }
