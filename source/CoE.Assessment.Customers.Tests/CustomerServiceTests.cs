@@ -5,6 +5,7 @@ using CoE.Assessment.Customers.Application.Services;
 using CoE.Assessment.Customers.Domain.Models;
 using CoE.Assessment.Customers.Domain.Repositories;
 
+namespace CoE.Assessment.Customers.Tests;
 public class CustomerServiceTests
 {
     private readonly Mock<ICustomersRepository> _mockCustomersRepository;
