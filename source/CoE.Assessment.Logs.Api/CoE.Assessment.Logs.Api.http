@@ -1,0 +1,6 @@
+@CoE.Assessment.Logs.Api_HostAddress = http://localhost:5216
+
+GET {{CoE.Assessment.Logs.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
